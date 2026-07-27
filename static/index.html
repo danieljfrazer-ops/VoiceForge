@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0d14">
+<title>VoiceForge</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= MAIN STUDIO ================= -->
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">🎙️</div>
+      <div>
+        <h1>VoiceForge</h1>
+        <div class="model-status" id="modelStatus"><span class="dot loading"></span><span id="modelStatusText">Warming up…</span></div>
+      </div>
+    </div>
+    <button class="icon-btn" id="btnSettingsVoice" title="Voice settings" hidden>⋯</button>
+  </header>
+
+  <!-- Voice switcher -->
+  <section class="voices-row-wrap">
+    <div class="voices-row" id="voicesRow">
+      <button class="voice-chip add" id="btnNewVoice"><span class="chip-plus">+</span> New voice</button>
+    </div>
+  </section>
+
+  <!-- Empty state -->
+  <section class="empty-state" id="emptyState" hidden>
+    <div class="empty-art">🎙️</div>
+    <h2>Clone your first voice</h2>
+    <p>Record a short sample and generate speech that sounds just like it — all locally on your Mac.</p>
+    <button class="btn primary" id="btnEmptyNew">Create a voice</button>
+  </section>
+
+  <!-- Composer -->
+  <section class="composer card" id="composer" hidden>
+    <div class="composer-head">
+      <span class="composer-voice" id="composerVoiceName">Voice</span>
+      <button class="mini-link" id="btnTweak">Fine-tune</button>
+    </div>
+    <div class="textarea-wrap">
+      <textarea id="genText" rows="4" maxlength="3000" placeholder="Type something for this voice to say — or tap the mic and dictate…"></textarea>
+      <div class="textarea-tools">
+        <span class="charcount" id="charCount">0 / 3000</span>
+        <button class="mic-btn" id="btnDictate" title="Dictate text">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="tweak-panel" id="tweakPanel" hidden>
+      <div class="slider-row">
+        <label>Variability <span id="valTemp">0.90</span></label>
+        <input type="range" id="sldTemp" min="0.1" max="1.5" step="0.05" value="0.9">
+      </div>
+      <div class="slider-row">
+        <label>Speed <span id="valSpeed">1.00</span></label>
+        <input type="range" id="sldSpeed" min="0.5" max="1.5" step="0.05" value="1.0">
+      </div>
+      <div class="tweak-actions">
+        <button class="mini-link" id="btnTweakReset">Reset to voice defaults</button>
+        <button class="mini-link accent" id="btnTweakSave">Save as voice defaults</button>
+      </div>
+    </div>
+    <button class="btn primary generate-btn" id="btnGenerate">
+      <span class="btn-label">Generate speech</span>
+    </button>
+  </section>
+
+  <!-- Clips -->
+  <section class="clips-section" id="clipsSection" hidden>
+    <h3 class="section-title" id="clipsTitle">Clips</h3>
+    <div id="clipsList" class="clips-list"></div>
+    <div class="clips-empty" id="clipsEmpty" hidden>
+      <p>No clips yet — generate your first one above.</p>
+    </div>
+  </section>
+
+  <div class="bottom-spacer"></div>
+</div>
+
+<!-- ================= NEW VOICE WIZARD ================= -->
+<div class="overlay" id="wizard" hidden>
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="wizard-head">
+      <button class="mini-link" id="wizBack">Back</button>
+      <div class="wizard-steps">
+        <span class="step-dot active" data-step="1"></span>
+        <span class="step-dot" data-step="2"></span>
+        <span class="step-dot" data-step="3"></span>
+      </div>
+      <button class="mini-link" id="wizCancel">Cancel</button>
+    </div>
+
+    <!-- Step 1: name -->
+    <div class="wiz-step" id="wizStep1">
+      <h2>Name your voice</h2>
+      <p class="hint">Whose voice is this? Give it a name you'll recognise.</p>
+      <input type="text" id="wizName" class="text-input" maxlength="40" placeholder="e.g. Daniel, Mum, Narrator…" autocomplete="off">
+      <button class="btn primary" id="wizNext1" disabled>Continue</button>
+    </div>
+
+    <!-- Step 2: record -->
+    <div class="wiz-step" id="wizStep2" hidden>
+      <h2>Record a sample</h2>
+      <p class="hint">Read naturally for <b>10–30 seconds</b> in a quiet room. Try the passage below, or say anything you like.</p>
+      <div class="passage" id="passage">
+        “The quick brown fox jumps over the lazy dog. I'm recording this sample so my computer can learn the sound of my voice. Sunshine sparkled on the water as the boat drifted slowly past the old lighthouse, and somewhere in the distance a bell rang twice.”
+      </div>
+      <div class="rec-visual">
+        <canvas id="recCanvas" width="600" height="120"></canvas>
+        <div class="rec-timer" id="recTimer">0:00</div>
+      </div>
+      <div class="rec-controls">
+        <button class="rec-btn" id="btnRecord"><span class="rec-icon"></span></button>
+      </div>
+      <div class="rec-hint" id="recHint">Tap to start recording</div>
+      <div class="rec-review" id="recReview" hidden>
+        <audio id="recPlayback" controls></audio>
+        <div class="rec-review-actions">
+          <button class="btn ghost" id="btnRerecord">Re-record</button>
+          <button class="btn primary" id="wizNext2">Use this sample</button>
+        </div>
+      </div>
+      <div class="upload-alt">
+        <label class="mini-link" for="fileUpload">…or upload an audio file</label>
+        <input type="file" id="fileUpload" accept="audio/*" hidden>
+      </div>
+    </div>
+
+    <!-- Step 3: finalize -->
+    <div class="wiz-step" id="wizStep3" hidden>
+      <h2>Fine-tune &amp; finalise</h2>
+      <p class="hint">Optional: adjust how the clone speaks, then hear a preview before saving.</p>
+      <div class="slider-row">
+        <label>Variability <span id="wizValTemp">0.90</span></label>
+        <input type="range" id="wizSldTemp" min="0.1" max="1.5" step="0.05" value="0.9">
+        <div class="slider-ends"><span>Consistent</span><span>Expressive</span></div>
+      </div>
+      <div class="slider-row">
+        <label>Speed <span id="wizValSpeed">1.00</span></label>
+        <input type="range" id="wizSldSpeed" min="0.5" max="1.5" step="0.05" value="1.0">
+        <div class="slider-ends"><span>Slower</span><span>Faster</span></div>
+      </div>
+      <div class="preview-box">
+        <button class="btn ghost" id="btnPreview">▶︎ Hear a preview</button>
+        <div id="previewPlayerWrap"></div>
+      </div>
+      <button class="btn primary" id="wizFinish">Finalise voice</button>
+    </div>
+
+    <!-- Busy state -->
+    <div class="wiz-step wiz-busy" id="wizBusy" hidden>
+      <div class="spinner"></div>
+      <h2 id="wizBusyTitle">Cloning voice…</h2>
+      <p class="hint" id="wizBusyHint">Analysing your sample locally.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= VOICE SETTINGS SHEET ================= -->
+<div class="overlay" id="voiceSheet" hidden>
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="wizard-head">
+      <span></span>
+      <h3 class="sheet-title">Voice settings</h3>
+      <button class="mini-link" id="vsClose">Done</button>
+    </div>
+    <div class="vs-body">
+      <label class="field-label">Name</label>
+      <input type="text" id="vsName" class="text-input" maxlength="40">
+      <label class="field-label">Original sample</label>
+      <audio id="vsSample" controls preload="none"></audio>
+      <div class="vs-meta" id="vsMeta"></div>
+      <button class="btn danger ghost" id="vsDelete">Delete voice</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>

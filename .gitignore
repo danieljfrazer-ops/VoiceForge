@@ -1,0 +1,28 @@
+# macOS
+.DS_Store
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+certs/
+*.pem
+*.key
+
+# Private voice samples and generated audio
+data/voices/
+
+# Logs and temporary files
+*.log
+tmp/
+temp/

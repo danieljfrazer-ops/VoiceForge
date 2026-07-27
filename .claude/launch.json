@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "voiceforge",
+      "runtimeExecutable": ".venv/bin/python",
+      "runtimeArgs": ["backend/server.py"],
+      "port": 7860
+    }
+  ]
+}
