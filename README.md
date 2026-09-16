@@ -4,8 +4,9 @@ A polished, mobile-friendly web app for cloning voices and generating speech —
 
 **[Live demo →](https://voiceforge-4n9.pages.dev)**
 
-▶️ **[Watch it generate speech live on a MacBook (28 s, with sound)](static/media/voiceforge-demo.mp4)**
-<!-- To embed an inline player: drag static/media/voiceforge-demo.mp4 into GitHub's README editor and replace the line above with the user-attachments URL it produces. -->
+https://github.com/user-attachments/assets/30847d3d-0e36-40e5-81c8-0301579a63e9
+
+*VoiceForge generating speech live on a MacBook (28 s, sound on). [Download the video](static/media/voiceforge-demo.mp4).*
 
 ## What it does
 
