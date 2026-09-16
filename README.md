@@ -2,8 +2,7 @@
 
 A polished, mobile-friendly web app for cloning voices and generating speech — running **100% locally** on your Mac. No cloud, no API keys; your voice never leaves your machine.
 
-<!-- Live demo URL is set after the first Cloudflare Pages deploy -->
-**[Live demo →](https://voiceforge.pages.dev)**
+**[Live demo →](https://voiceforge-4n9.pages.dev)**
 
 <!-- DEMO VIDEO: docs/demo.gif or YouTube link goes here -->
 

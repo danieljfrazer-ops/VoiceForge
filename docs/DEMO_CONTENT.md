@@ -1,6 +1,6 @@
 # Making demo content
 
-The hosted demo at [voiceforge.pages.dev](https://voiceforge.pages.dev) is a static site with no
+The hosted demo at [voiceforge-4n9.pages.dev](https://voiceforge-4n9.pages.dev) is a static site with no
 backend — it plays back clips you generate locally and export with
 `scripts/export_demo.py`. This is a step-by-step guide to producing that content.
 
