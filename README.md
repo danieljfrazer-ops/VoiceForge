@@ -4,8 +4,8 @@ A polished, mobile-friendly web app for cloning voices and generating speech —
 
 **[Live demo →](https://voiceforge-4n9.pages.dev)**
 
-▶️ **[Watch it generate speech live on a MacBook (28 s, with sound)](docs/voiceforge-demo.mp4)**
-<!-- To embed an inline player: drag docs/voiceforge-demo.mp4 into GitHub's README editor and replace the line above with the user-attachments URL it produces. -->
+▶️ **[Watch it generate speech live on a MacBook (28 s, with sound)](static/media/voiceforge-demo.mp4)**
+<!-- To embed an inline player: drag static/media/voiceforge-demo.mp4 into GitHub's README editor and replace the line above with the user-attachments URL it produces. -->
 
 ## What it does
 
@@ -105,6 +105,7 @@ backend/
   storage.py    Filesystem-backed voice/clip storage
 static/         Vanilla JS single-page app (served by the backend; also the Pages build output)
   demo/         Pre-generated demo content (empty until you export voices; commit it to publish)
+  media/        Screen recording shown on the hosted demo
 scripts/
   export_demo.py  Exports voices from data/voices/ into static/demo/
 docs/

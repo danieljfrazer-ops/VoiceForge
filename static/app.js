@@ -831,6 +831,7 @@ $("demoGateClose2").onclick = closeDemoGate;
 /* ---------------- demo banner ---------------- */
 function setupDemoBanner() {
   $("demoBanner").hidden = MODE !== "demo";
+  $("demoVideoCard").hidden = MODE !== "demo";
 }
 
 /* ---------------- mode-dependent UI setup (run once, after resolveMode) ---------------- */

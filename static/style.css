@@ -272,6 +272,17 @@ input[type="range"]::-webkit-slider-thumb {
 .original-quote.expanded { -webkit-line-clamp: unset; overflow: visible; }
 .original-engine-note { font-size: 12px; color: var(--text-faint); margin-top: 10px; }
 
+/* ---------------- live generation video (demo) ---------------- */
+.video-card {
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
+}
+.video-card-text { font-size: 13px; color: var(--text-dim); line-height: 1.5; margin: 6px 0 12px; }
+.video-card video {
+  display: block; width: 100%; max-width: 100%; aspect-ratio: 4 / 3;
+  border-radius: 12px; background: #000;
+}
+
 .clip-card {
   background: var(--card); border: 1px solid var(--card-border);
   border-radius: var(--radius); padding: 12px 14px;
