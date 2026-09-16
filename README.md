@@ -47,8 +47,8 @@ Requirements:
 - `brew install uv sox ffmpeg`
 
 ```bash
-git clone https://github.com/danieljfrazer-ops/VoiceCloner.git
-cd VoiceCloner
+git clone https://github.com/danieljfrazer-ops/VoiceForge.git
+cd VoiceForge
 ./run.sh
 ```
 

@@ -10,7 +10,7 @@ const $ = (id) => document.getElementById(id);
 */
 const CONFIG = Object.assign({
   mode: "auto",
-  repoUrl: "https://github.com/danieljfrazer-ops/VoiceCloner",
+  repoUrl: "https://github.com/danieljfrazer-ops/VoiceForge",
 }, window.VOICEFORGE_CONFIG || {});
 
 let MODE = "local";   // resolved in resolveMode(): "local" | "demo"

@@ -11,10 +11,10 @@ Examples:
     python3 scripts/export_demo.py --list
 
     # Export two voices, by name, into static/demo (the default)
-    python3 scripts/export_demo.py "Dan" "Yas"
+    python3 scripts/export_demo.py "Dan" "Leila"
 
     # Export by id, at a lower bitrate, without the reference sample audio
-    python3 scripts/export_demo.py 1336578d3fd5 --bitrate 96k --no-sample
+    python3 scripts/export_demo.py dbad31e2e19b --bitrate 96k --no-sample
 
     # Include preview clips too, and export to a custom directory
     python3 scripts/export_demo.py "Dan" --include-previews --out /tmp/demo-preview
