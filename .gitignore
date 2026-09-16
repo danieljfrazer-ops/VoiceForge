@@ -26,3 +26,6 @@ data/voices/
 *.log
 tmp/
 temp/
+
+# Cloudflare Wrangler cache
+.wrangler/
