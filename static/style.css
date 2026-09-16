@@ -61,10 +61,17 @@ body {
   background: linear-gradient(90deg, #fff, #c7cdf0);
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
+.demo-tag {
+  display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.06em; vertical-align: middle;
+  background: rgba(34, 211, 238, 0.16); color: var(--accent-2);
+  -webkit-text-fill-color: var(--accent-2);
+}
 .model-status { font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
 .dot { width: 7px; height: 7px; border-radius: 50%; background: #34d399; flex-shrink: 0; }
 .dot.loading { background: #fbbf24; animation: pulse 1.4s ease-in-out infinite; }
 .dot.error { background: var(--danger); }
+.dot.demo { background: var(--accent); }
 @keyframes pulse { 50% { opacity: 0.35; } }
 
 .icon-btn {
@@ -73,6 +80,21 @@ body {
   transition: background 0.15s;
 }
 .icon-btn:active { background: rgba(255, 255, 255, 0.1); }
+
+/* ---------------- demo banner ---------------- */
+.demo-banner {
+  margin: 0 0 16px; padding: 14px 16px; border-radius: var(--radius-sm);
+  background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.28);
+}
+.demo-banner-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.demo-pill {
+  flex-shrink: 0; padding: 2px 8px; border-radius: 999px;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.06em;
+  background: var(--accent-grad); color: #fff;
+}
+.demo-banner-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.demo-banner-text { font-size: 13px; color: var(--text-dim); line-height: 1.5; margin-bottom: 8px; }
+.demo-banner-link { color: var(--accent-2); font-size: 13px; font-weight: 600; text-decoration: none; }
 
 /* ---------------- voice chips ---------------- */
 .voices-row-wrap { margin: 2px -18px 16px; }
@@ -155,6 +177,25 @@ textarea::placeholder { color: var(--text-faint); }
 .mic-btn.busy { color: var(--accent-2); }
 @keyframes micPulse { 50% { box-shadow: 0 0 0 10px rgba(248, 113, 113, 0.15); } }
 
+/* ---------------- try-a-line chips (demo) ---------------- */
+.try-lines-label {
+  font-size: 11.5px; font-weight: 700; color: var(--text-faint);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-top: 12px;
+}
+.try-lines {
+  display: flex; gap: 8px; overflow-x: auto; margin-top: 10px; padding-bottom: 2px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.try-lines::-webkit-scrollbar { display: none; }
+.try-line-chip {
+  flex-shrink: 0; max-width: 220px; padding: 7px 13px; border-radius: 999px;
+  font-size: 13px; font-weight: 600; font-family: inherit;
+  border: 1px solid var(--card-border); background: var(--card); color: var(--text-dim);
+  cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: all 0.18s ease;
+}
+.try-line-chip:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.1); }
+
 /* ---------------- tweak sliders ---------------- */
 .tweak-panel {
   margin-top: 12px; padding: 14px; border-radius: var(--radius-sm);
@@ -216,6 +257,21 @@ input[type="range"]::-webkit-slider-thumb {
 .clips-list { display: flex; flex-direction: column; gap: 10px; }
 .clips-empty { color: var(--text-faint); font-size: 14px; text-align: center; padding: 24px 0; }
 
+/* ---------------- original recording card (demo) ---------------- */
+.original-card {
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
+}
+.original-sub { text-transform: none; letter-spacing: 0; color: var(--text-faint); font-weight: 500; }
+.original-card audio { width: 100%; margin: 10px 0 12px; }
+.original-quote {
+  font-size: 14px; line-height: 1.55; color: var(--text-dim); font-style: italic;
+  border-left: 3px solid var(--card-border); padding-left: 12px; cursor: pointer;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.original-quote.expanded { -webkit-line-clamp: unset; overflow: visible; }
+.original-engine-note { font-size: 12px; color: var(--text-faint); margin-top: 10px; }
+
 .clip-card {
   background: var(--card); border: 1px solid var(--card-border);
   border-radius: var(--radius); padding: 12px 14px;
@@ -241,6 +297,7 @@ input[type="range"]::-webkit-slider-thumb {
   color: var(--accent-2); background: rgba(34, 211, 238, 0.1);
   padding: 0 6px; border-radius: 5px; font-weight: 600;
 }
+.clip-badge.pre-recorded { color: var(--accent); background: rgba(139, 92, 246, 0.12); }
 .clip-actions { display: flex; gap: 2px; flex-shrink: 0; }
 .clip-icon-btn {
   width: 34px; height: 34px; border: none; background: none; color: var(--text-faint);
@@ -335,6 +392,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 .rec-review { margin-bottom: 14px; }
 .rec-review audio, .vs-body audio, .preview-box audio { width: 100%; margin-bottom: 12px; }
+audio { color-scheme: dark; }
 .rec-review-actions { display: flex; gap: 10px; }
 .rec-review-actions .btn { flex: 1; }
 
@@ -356,6 +414,10 @@ input[type="range"]::-webkit-slider-thumb {
   color: var(--text-faint); font-weight: 700; margin-bottom: 8px;
 }
 .vs-meta { font-size: 13px; color: var(--text-faint); margin: 4px 0 22px; }
+
+/* ---------------- sheet button stacks (demo gate) ---------------- */
+.sheet-btn-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.sheet-btn-stack a.btn { text-decoration: none; }
 
 /* ---------------- toast ---------------- */
 .toast {

@@ -1,0 +1,205 @@
+{
+  "generated_at": "2026-09-16T16:58:41Z",
+  "engine": "Qwen3-TTS 1.7B Base (MLX)",
+  "voices": [
+    {
+      "id": "dbad31e2e19b",
+      "name": "Dan",
+      "created": 1789577452.619622,
+      "config": {
+        "temperature": 0.9,
+        "speed": 1.0
+      },
+      "sample_duration": 13.08,
+      "ref_text": "I'm recording this sample so my computer can learn the sound of my voice. Sunshine sparkled on the water as the boat drifted slowly past the old lighthouse and somewhere in the distance a bell rang.",
+      "finalized": true,
+      "clips": [
+        {
+          "id": "e5f2e50cd23d",
+          "voice_id": "dbad31e2e19b",
+          "text": "Welcome to Voice Forge, an experiment to clone voices locally on my macbook using local models. This clip was generated using Qwen 3 TTS on MLX",
+          "duration": 10.4,
+          "created": 1789577726.6958258,
+          "config": {
+            "temperature": 0.9,
+            "speed": 1.0
+          },
+          "kind": "clip",
+          "audio_url": "demo/voices/dbad31e2e19b/clips/e5f2e50cd23d.mp3"
+        },
+        {
+          "id": "a450815efe16",
+          "voice_id": "dbad31e2e19b",
+          "text": "Hello! This is Dan. My voice has been cloned, and this is how I sound.",
+          "duration": 4.32,
+          "created": 1789577460.598973,
+          "config": {
+            "temperature": 0.9,
+            "speed": 1.0
+          },
+          "kind": "preview",
+          "audio_url": "demo/voices/dbad31e2e19b/clips/a450815efe16.mp3"
+        }
+      ],
+      "sample_url": "demo/voices/dbad31e2e19b/sample.mp3"
+    },
+    {
+      "id": "d612b6f8e37a",
+      "name": "Leila",
+      "created": 1784384045.133245,
+      "config": {
+        "temperature": 0.8,
+        "speed": 1.0
+      },
+      "sample_duration": 23.81,
+      "ref_text": "Why? Okay, I like my bedroom and sometimes I really like my toys and I like my sleeping...",
+      "finalized": true,
+      "clips": [
+        {
+          "id": "da75cd82992e",
+          "voice_id": "d612b6f8e37a",
+          "text": "Hey! You moved my toy!",
+          "duration": 2.16,
+          "created": 1784385068.4976673,
+          "config": {
+            "temperature": 0.8,
+            "speed": 1.0
+          },
+          "kind": "clip",
+          "audio_url": "demo/voices/d612b6f8e37a/clips/da75cd82992e.mp3"
+        },
+        {
+          "id": "dad0bcdb99e3",
+          "voice_id": "d612b6f8e37a",
+          "text": "Aww, I like it there. Thank you!",
+          "duration": 3.2,
+          "created": 1784385061.1456802,
+          "config": {
+            "temperature": 0.8,
+            "speed": 1.0
+          },
+          "kind": "clip",
+          "audio_url": "demo/voices/d612b6f8e37a/clips/dad0bcdb99e3.mp3"
+        },
+        {
+          "id": "d40e0015ef7e",
+          "voice_id": "d612b6f8e37a",
+          "text": "Do you like this one too?",
+          "duration": 2.08,
+          "created": 1784385050.7384207,
+          "config": {
+            "temperature": 0.8,
+            "speed": 1.0
+          },
+          "kind": "clip",
+          "audio_url": "demo/voices/d612b6f8e37a/clips/d40e0015ef7e.mp3"
+        },
+        {
+          "id": "e8d4130ab558",
+          "voice_id": "d612b6f8e37a",
+          "text": "I've got to keep my room tidy.",
+          "duration": 2.56,
+          "created": 1784385044.012022,
+          "config": {
+            "temperature": 0.8,
+            "speed": 1.0
+          },
+          "kind": "clip",
+          "audio_url": "demo/voices/d612b6f8e37a/clips/e8d4130ab558.mp3"
+        },
+        {
+          "id": "e25d867ebe77",
+          "voice_id": "d612b6f8e37a",
+          "text": "Help me keep my room tidy.",
+          "duration": 2.56,
+          "created": 1784385035.553768,
+          "config": {
+            "temperature": 0.8,
+            "speed": 1.0
+          },
+          "kind": "clip",
+          "audio_url": "demo/voices/d612b6f8e37a/clips/e25d867ebe77.mp3"
+        },
+        {
+          "id": "64fa7a7bb003",
+          "voice_id": "d612b6f8e37a",
+          "text": "What's your favourite toy?",
+          "duration": 1.92,
+          "created": 1784385027.4878988,
+          "config": {
+            "temperature": 0.8,
+            "speed": 1.0
+          },
+          "kind": "clip",
+          "audio_url": "demo/voices/d612b6f8e37a/clips/64fa7a7bb003.mp3"
+        },
+        {
+          "id": "ec15060dcb32",
+          "voice_id": "d612b6f8e37a",
+          "text": "I think that one's my favourite.",
+          "duration": 2.4,
+          "created": 1784385021.15906,
+          "config": {
+            "temperature": 0.8,
+            "speed": 1.0
+          },
+          "kind": "clip",
+          "audio_url": "demo/voices/d612b6f8e37a/clips/ec15060dcb32.mp3"
+        },
+        {
+          "id": "74bdb27f90cb",
+          "voice_id": "d612b6f8e37a",
+          "text": "Welcome to my bedroom!",
+          "duration": 2.4,
+          "created": 1784384570.2621205,
+          "config": {
+            "temperature": 0.8,
+            "speed": 1.0
+          },
+          "kind": "clip",
+          "audio_url": "demo/voices/d612b6f8e37a/clips/74bdb27f90cb.mp3"
+        },
+        {
+          "id": "38bfa3ec3c11",
+          "voice_id": "d612b6f8e37a",
+          "text": "Help me win more toys, please!",
+          "duration": 2.72,
+          "created": 1784384563.088535,
+          "config": {
+            "temperature": 0.8,
+            "speed": 1.0
+          },
+          "kind": "clip",
+          "audio_url": "demo/voices/d612b6f8e37a/clips/38bfa3ec3c11.mp3"
+        },
+        {
+          "id": "257bf2c54cbc",
+          "voice_id": "d612b6f8e37a",
+          "text": "Ooh, I like my toys!",
+          "duration": 2.08,
+          "created": 1784384554.9667852,
+          "config": {
+            "temperature": 0.8,
+            "speed": 1.0
+          },
+          "kind": "clip",
+          "audio_url": "demo/voices/d612b6f8e37a/clips/257bf2c54cbc.mp3"
+        },
+        {
+          "id": "7ac5478e5917",
+          "voice_id": "d612b6f8e37a",
+          "text": "Welcome to my bedroom! ... Ooh, I like my toys! ... Help me win more toys, please!",
+          "duration": 7.2,
+          "created": 1784384045.1368594,
+          "config": {
+            "temperature": 0.8,
+            "speed": 1.0
+          },
+          "kind": "clip",
+          "audio_url": "demo/voices/d612b6f8e37a/clips/7ac5478e5917.mp3"
+        }
+      ],
+      "sample_url": "demo/voices/d612b6f8e37a/sample.mp3"
+    }
+  ]
+}

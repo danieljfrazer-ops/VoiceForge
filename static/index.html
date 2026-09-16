@@ -19,26 +19,37 @@
     <div class="brand">
       <div class="brand-mark">🎙️</div>
       <div>
-        <h1>VoiceForge</h1>
+        <h1>VoiceForge <span class="demo-tag" id="brandDemoTag" hidden>DEMO</span></h1>
         <div class="model-status" id="modelStatus"><span class="dot loading"></span><span id="modelStatusText">Warming up…</span></div>
       </div>
     </div>
     <button class="icon-btn" id="btnSettingsVoice" title="Voice settings" hidden>⋯</button>
   </header>
 
+  <!-- Demo banner (demo mode only) -->
+  <div class="demo-banner" id="demoBanner" hidden>
+    <div class="demo-banner-head">
+      <span class="demo-pill">DEMO</span>
+      <span class="demo-banner-title">Pre-recorded demo</span>
+    </div>
+    <p class="demo-banner-text">Every clip here was generated earlier on a Mac and saved. Nothing is generated live — to clone a voice, run VoiceForge locally.</p>
+    <a class="demo-banner-link" id="demoBannerGithub" href="#" target="_blank" rel="noopener">View on GitHub</a>
+  </div>
+
   <!-- Voice switcher -->
   <section class="voices-row-wrap">
     <div class="voices-row" id="voicesRow">
-      <button class="voice-chip add" id="btnNewVoice"><span class="chip-plus">+</span> New voice</button>
+      <button class="voice-chip add" id="btnNewVoice"><span class="chip-plus">+</span> <span id="btnNewVoiceLabel">New voice</span></button>
     </div>
   </section>
 
   <!-- Empty state -->
   <section class="empty-state" id="emptyState" hidden>
     <div class="empty-art">🎙️</div>
-    <h2>Clone your first voice</h2>
-    <p>Record a short sample and generate speech that sounds just like it — all locally on your Mac.</p>
+    <h2 id="emptyTitle">Clone your first voice</h2>
+    <p id="emptyText">Record a short sample and generate speech that sounds just like it — all locally on your Mac.</p>
     <button class="btn primary" id="btnEmptyNew">Create a voice</button>
+    <a class="btn primary" id="emptyGithubLink" href="#" target="_blank" rel="noopener" hidden>View on GitHub</a>
   </section>
 
   <!-- Composer -->
@@ -56,6 +67,8 @@
         </button>
       </div>
     </div>
+    <div class="try-lines-label" id="tryLinesLabel" hidden>Pre-recorded lines — tap to play</div>
+    <div class="try-lines" id="tryLines" hidden></div>
     <div class="tweak-panel" id="tweakPanel" hidden>
       <div class="slider-row">
         <label>Variability <span id="valTemp">0.90</span></label>
@@ -77,6 +90,12 @@
 
   <!-- Clips -->
   <section class="clips-section" id="clipsSection" hidden>
+    <div class="original-card" id="originalCard" hidden>
+      <div class="field-label">Original recording <span class="original-sub">(the reference sample)</span></div>
+      <audio id="originalAudio" controls preload="none"></audio>
+      <blockquote class="original-quote" id="originalQuote"></blockquote>
+      <p class="original-engine-note" id="originalEngineNote" hidden></p>
+    </div>
     <h3 class="section-title" id="clipsTitle">Clips</h3>
     <div id="clipsList" class="clips-list"></div>
     <div class="clips-empty" id="clipsEmpty" hidden>
@@ -187,9 +206,29 @@
   </div>
 </div>
 
+<!-- ================= DEMO GATE ================= -->
+<div class="overlay" id="demoGate" hidden>
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="wizard-head">
+      <span></span>
+      <h3 class="sheet-title">This is a pre-recorded demo</h3>
+      <button class="mini-link" id="demoGateClose">Close</button>
+    </div>
+    <div class="vs-body">
+      <p class="hint">The hosted version only plays clips that were generated ahead of time. Voice cloning and speech generation run on your own Apple Silicon Mac with the local app.</p>
+      <div class="sheet-btn-stack">
+        <a class="btn primary" id="demoGateGithub" href="#" target="_blank" rel="noopener">View on GitHub</a>
+        <button class="btn ghost" id="demoGateClose2">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast" hidden></div>
 
+<script src="config.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

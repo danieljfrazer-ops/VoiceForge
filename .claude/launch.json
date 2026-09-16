@@ -4,8 +4,22 @@
     {
       "name": "voiceforge",
       "runtimeExecutable": ".venv/bin/python",
-      "runtimeArgs": ["backend/server.py"],
+      "runtimeArgs": [
+        "backend/server.py"
+      ],
       "port": 7860
+    },
+    {
+      "name": "static-demo",
+      "runtimeExecutable": ".venv/bin/python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8788",
+        "--directory",
+        "static"
+      ],
+      "port": 8788
     }
   ]
 }

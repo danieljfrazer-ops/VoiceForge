@@ -2,7 +2,75 @@
 "use strict";
 
 const $ = (id) => document.getElementById(id);
-const api = {
+
+/* ---------------- config & mode ----------------
+   Two modes the same static/ folder can run in:
+   - "local" — served by the FastAPI backend, relative /api/... URLs (unchanged behaviour)
+   - "demo"  — no backend; reads static/demo/voices.json, everything else is read-only
+*/
+const CONFIG = Object.assign({
+  mode: "auto",
+  repoUrl: "https://github.com/danieljfrazer-ops/VoiceCloner",
+}, window.VOICEFORGE_CONFIG || {});
+
+let MODE = "local";   // resolved in resolveMode(): "local" | "demo"
+
+async function detectLocalBackend() {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 2000);
+    const res = await fetch("/api/status", { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!res.ok) return false;
+    const ct = res.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) return false;
+    const data = await res.json();
+    return !!data && typeof data === "object" && "tts_loaded" in data;
+  } catch { return false; }
+}
+
+async function resolveMode() {
+  if (CONFIG.mode === "demo") { MODE = "demo"; return; }
+  if (CONFIG.mode === "local") { MODE = "local"; return; }
+  // auto: only local if a real JSON /api/status answers same-origin
+  MODE = (await detectLocalBackend()) ? "local" : "demo";
+}
+
+/* ---------------- demo data adapter ---------------- */
+class DemoError extends Error {}
+
+let demoManifestPromise = null;
+function loadDemoManifest() {
+  if (!demoManifestPromise) {
+    demoManifestPromise = fetch("demo/voices.json")
+      .then(res => res.ok ? res.json() : {})
+      .catch(() => ({}))
+      .then(m => ({
+        generated_at: m.generated_at || null,
+        engine: m.engine || "Qwen3-TTS",
+        voices: Array.isArray(m.voices) ? m.voices : [],
+      }));
+  }
+  return demoManifestPromise;
+}
+
+const demoApi = {
+  async status() {
+    const m = await loadDemoManifest();
+    return { tts_loaded: true, tts_loading: false, tts_error: false,
+              stt_loaded: false, stt_loading: false, device: "demo", engine: m.engine, model: "" };
+  },
+  async voices() { return (await loadDemoManifest()).voices; },
+  async createVoice() { throw new DemoError("Cloning runs on your own Mac."); },
+  async patchVoice() { throw new DemoError("Cloning runs on your own Mac."); },
+  async deleteVoice() { throw new DemoError("Cloning runs on your own Mac."); },
+  async generate() { throw new DemoError("Generation runs on your own Mac."); },
+  async deleteClip() { throw new DemoError("This is a read-only demo."); },
+  async transcribe() { throw new DemoError("Dictation needs the local app."); },
+};
+
+/* ---------------- real (local) api ---------------- */
+const realApi = {
   async req(path, opts = {}) {
     const res = await fetch(path, opts);
     if (!res.ok) {
@@ -12,17 +80,32 @@ const api = {
     }
     return res.json();
   },
-  status: () => api.req("/api/status"),
-  voices: () => api.req("/api/voices"),
-  createVoice: (form) => api.req("/api/voices", { method: "POST", body: form }),
-  patchVoice: (id, body) => api.req(`/api/voices/${id}`, {
+  status: () => realApi.req("/api/status"),
+  voices: () => realApi.req("/api/voices"),
+  createVoice: (form) => realApi.req("/api/voices", { method: "POST", body: form }),
+  patchVoice: (id, body) => realApi.req(`/api/voices/${id}`, {
     method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
-  deleteVoice: (id) => api.req(`/api/voices/${id}`, { method: "DELETE" }),
-  generate: (id, body) => api.req(`/api/voices/${id}/generate`, {
+  deleteVoice: (id) => realApi.req(`/api/voices/${id}`, { method: "DELETE" }),
+  generate: (id, body) => realApi.req(`/api/voices/${id}/generate`, {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
-  deleteClip: (vid, cid) => api.req(`/api/voices/${vid}/clips/${cid}`, { method: "DELETE" }),
-  transcribe: (form) => api.req("/api/transcribe", { method: "POST", body: form }),
+  deleteClip: (vid, cid) => realApi.req(`/api/voices/${vid}/clips/${cid}`, { method: "DELETE" }),
+  transcribe: (form) => realApi.req("/api/transcribe", { method: "POST", body: form }),
 };
+
+let api = realApi; // swapped to demoApi in boot() once MODE === "demo"
+
+function handleApiError(e) {
+  if (e instanceof DemoError) { openDemoGate(); return; }
+  toast(e.message, true);
+}
+
+/* ---------------- clip audio URL ----------------
+   local: plain relative "/api/..." URL
+   demo:  the clip already carries its own manifest URL (audio_url)
+*/
+function clipAudioSrc(clip) {
+  return MODE === "demo" ? clip.audio_url : `/api/voices/${clip.voice_id}/clips/${clip.id}/audio`;
+}
 
 /* ---------------- state ---------------- */
 let voices = [];
@@ -49,10 +132,16 @@ function toast(msg, isError = false) {
 
 /* ---------------- model status ---------------- */
 async function pollStatus() {
+  const dot = document.querySelector("#modelStatus .dot");
+  const txt = $("modelStatusText");
+  if (MODE === "demo") {
+    dot.className = "dot demo";
+    txt.textContent = "Demo · pre-recorded audio";
+    modelReady = false;
+    return;
+  }
   try {
     const s = await api.status();
-    const dot = document.querySelector("#modelStatus .dot");
-    const txt = $("modelStatusText");
     if (s.tts_error) {
       dot.className = "dot error";
       txt.textContent = "Model failed to load";
@@ -67,7 +156,7 @@ async function pollStatus() {
       txt.textContent = "Loading voice model…";
     }
   } catch {
-    $("modelStatusText").textContent = "Connecting…";
+    txt.textContent = "Connecting…";
   }
   setTimeout(pollStatus, 2500);
 }
@@ -164,14 +253,23 @@ function renderVoices() {
     row.insertBefore(chip, addBtn);
   }
   const hasVoices = voices.length > 0;
+  const demoEmpty = MODE === "demo" && !hasVoices;
   $("emptyState").hidden = hasVoices;
+  $("emptyTitle").textContent = demoEmpty ? "No demo voices published yet" : "Clone your first voice";
+  $("emptyText").textContent = demoEmpty
+    ? "This demo doesn't have any published voices right now — run VoiceForge locally to clone your own."
+    : "Record a short sample and generate speech that sounds just like it — all locally on your Mac.";
+  $("btnEmptyNew").hidden = demoEmpty;
+  $("emptyGithubLink").hidden = !demoEmpty;
   $("composer").hidden = !hasVoices;
   $("clipsSection").hidden = !hasVoices;
   $("btnSettingsVoice").hidden = !hasVoices;
   if (hasVoices && !activeVoice()) selectVoice(voices[0].id);
   if (hasVoices) {
     $("composerVoiceName").textContent = activeVoice().name;
-    $("clipsTitle").textContent = `Clips · ${activeVoice().name}`;
+    $("clipsTitle").textContent = MODE === "demo"
+      ? `Pre-recorded clips · ${activeVoice().name}`
+      : `Clips · ${activeVoice().name}`;
   }
 }
 
@@ -184,6 +282,11 @@ function selectVoice(id) {
   stopPlayback();
   renderVoices();
   renderClips();
+  if (MODE === "demo") {
+    $("genText").value = "";
+    renderTryLines();
+    renderOriginalCard();
+  }
 }
 
 /* ---------------- render: clips ---------------- */
@@ -235,7 +338,7 @@ function togglePlay(clip) {
   }
   stopPlayback();
   playingClipId = clip.id;
-  player.src = `/api/voices/${clip.voice_id}/clips/${clip.id}/audio`;
+  player.src = clipAudioSrc(clip);
   card.classList.add("playing");
   card.querySelector(".clip-play").textContent = "❚❚";
   player.play().catch(() => {
@@ -262,13 +365,14 @@ function renderClips() {
         <div class="clip-body">
           <div class="clip-text">${escapeHtml(clip.text)}</div>
           <div class="clip-meta">
+            ${MODE === "demo" ? '<span class="clip-badge pre-recorded">pre-recorded</span>' : ""}
             ${clip.kind === "preview" ? '<span class="clip-badge">preview</span>' : ""}
             <span>${fmtTime(clip.duration || 0)}</span><span>·</span><span>${fmtDate(clip.created)}</span>
           </div>
         </div>
         <div class="clip-actions">
           <button class="clip-icon-btn dl" title="Download">↓</button>
-          <button class="clip-icon-btn del" title="Delete">✕</button>
+          <button class="clip-icon-btn del" title="Delete"${MODE === "demo" ? " hidden" : ""}>✕</button>
         </div>
       </div>
       <div class="clip-progress">
@@ -284,22 +388,70 @@ function renderClips() {
     });
     card.querySelector(".dl").onclick = () => {
       const a = document.createElement("a");
-      a.href = `/api/voices/${clip.voice_id}/clips/${clip.id}/audio`;
-      a.download = `${activeVoice()?.name || "clip"}-${clip.id}.wav`;
+      a.href = clipAudioSrc(clip);
+      a.download = `${activeVoice()?.name || "clip"}-${clip.id}.${MODE === "demo" ? "mp3" : "wav"}`;
       a.click();
     };
-    card.querySelector(".del").onclick = async () => {
-      if (!confirm("Delete this clip?")) return;
-      try {
-        await api.deleteClip(clip.voice_id, clip.id);
-        if (playingClipId === clip.id) stopPlayback();
-        await refreshVoices(false);
-        renderClips();
-      } catch (e) { toast(e.message, true); }
-    };
+    if (MODE !== "demo") {
+      card.querySelector(".del").onclick = async () => {
+        if (!confirm("Delete this clip?")) return;
+        try {
+          await api.deleteClip(clip.voice_id, clip.id);
+          if (playingClipId === clip.id) stopPlayback();
+          await refreshVoices(false);
+          renderClips();
+        } catch (e) { handleApiError(e); }
+      };
+    }
     list.appendChild(card);
   }
 }
+
+/* ---------------- try-a-line chips (demo) ---------------- */
+function truncate(s, n) {
+  s = (s || "").trim();
+  return s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s;
+}
+
+function renderTryLines() {
+  const wrap = $("tryLines");
+  const v = activeVoice();
+  const clips = v ? (v.clips || []) : [];
+  wrap.innerHTML = "";
+  const empty = clips.length === 0;
+  wrap.hidden = empty;
+  $("tryLinesLabel").hidden = empty;
+  for (const clip of clips) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "try-line-chip";
+    chip.textContent = truncate(clip.text, 40);
+    chip.title = clip.text;
+    chip.onclick = () => {
+      $("genText").value = clip.text;
+      $("genText").dispatchEvent(new Event("input"));
+      togglePlay(clip);
+    };
+    wrap.appendChild(chip);
+  }
+}
+
+/* ---------------- original recording card (demo) ---------------- */
+async function renderOriginalCard() {
+  const v = activeVoice();
+  const card = $("originalCard");
+  if (!v || MODE !== "demo" || !v.sample_url) { card.hidden = true; return; }
+  card.hidden = false;
+  $("originalAudio").src = v.sample_url;
+  const quote = $("originalQuote");
+  quote.textContent = v.ref_text || "";
+  quote.classList.remove("expanded");
+  const manifest = await loadDemoManifest();
+  const note = $("originalEngineNote");
+  note.textContent = manifest.engine ? `Clips were cloned from this recording with ${manifest.engine}.` : "";
+  note.hidden = !manifest.engine;
+}
+$("originalQuote").addEventListener("click", () => $("originalQuote").classList.toggle("expanded"));
 
 /* ---------------- generation ---------------- */
 $("genText").addEventListener("input", () => {
@@ -307,6 +459,7 @@ $("genText").addEventListener("input", () => {
 });
 
 $("btnGenerate").onclick = async () => {
+  if (MODE === "demo") { openDemoGate(); return; }
   const v = activeVoice();
   const text = $("genText").value.trim();
   if (!v) return;
@@ -327,7 +480,7 @@ $("btnGenerate").onclick = async () => {
     $("genText").value = "";
     $("charCount").textContent = "0 / 3000";
   } catch (e) {
-    toast(e.message, true);
+    handleApiError(e);
   } finally {
     btn.classList.remove("working");
     btn.disabled = false;
@@ -348,12 +501,13 @@ $("btnTweakSave").onclick = async () => {
     await refreshVoices(false);
     tweakDirty = false;
     toast("Saved as voice defaults");
-  } catch (e) { toast(e.message, true); }
+  } catch (e) { handleApiError(e); }
 };
 
 /* ---------------- dictation ---------------- */
 let dictRec = null;
 $("btnDictate").onclick = async () => {
+  if (MODE === "demo") { openDemoGate(); return; }
   const btn = $("btnDictate");
   if (dictRec) { // stop & transcribe
     const rec = dictRec; dictRec = null;
@@ -373,7 +527,7 @@ $("btnDictate").onclick = async () => {
         toast("Didn't catch that — try again");
       }
     } catch (e) {
-      toast(e.message, true);
+      handleApiError(e);
     } finally {
       btn.classList.remove("busy");
     }
@@ -435,6 +589,11 @@ function openWizard() {
   setTimeout(() => $("wizName").focus(), 350);
 }
 
+function handleNewVoiceClick() {
+  if (MODE === "demo") { openDemoGate(); return; }
+  openWizard();
+}
+
 async function closeWizard() {
   if (wiz.rec) { try { await wiz.rec.stop(); } catch {} stopMeter(); wiz.rec = null; }
   // voice created but wizard abandoned before finalize -> clean up
@@ -447,8 +606,8 @@ async function closeWizard() {
   $("wizard").hidden = true;
 }
 
-$("btnNewVoice").onclick = openWizard;
-$("btnEmptyNew").onclick = openWizard;
+$("btnNewVoice").onclick = handleNewVoiceClick;
+$("btnEmptyNew").onclick = handleNewVoiceClick;
 $("wizCancel").onclick = closeWizard;
 $("wizBack").onclick = () => { if (wiz.step === 2) wizShow(1); else if (wiz.step === 3) wizShow(2); };
 
@@ -566,7 +725,7 @@ $("wizNext2").onclick = async () => {
     wiz.voiceId = voice.id;
     wizShow(3);
   } catch (e) {
-    toast(e.message, true);
+    handleApiError(e);
     wizShow(2);
   }
 };
@@ -595,7 +754,7 @@ $("btnPreview").onclick = async () => {
     wrap.appendChild(audio);
     audio.play().catch(() => {});
   } catch (e) {
-    toast(e.message, true);
+    handleApiError(e);
   } finally {
     btn.disabled = false;
     btn.textContent = "▶︎ Hear a preview";
@@ -618,7 +777,7 @@ $("wizFinish").onclick = async () => {
     await refreshVoices(false);
     selectVoice(id);
     toast(`Voice “${wiz.name}” is ready 🎉`);
-  } catch (e) { toast(e.message, true); }
+  } catch (e) { handleApiError(e); }
 };
 
 /* ---------------- voice settings sheet ---------------- */
@@ -626,7 +785,9 @@ $("btnSettingsVoice").onclick = () => {
   const v = activeVoice();
   if (!v) return;
   $("vsName").value = v.name;
-  $("vsSample").src = `/api/voices/${v.id}/sample`;
+  $("vsName").readOnly = MODE === "demo";
+  $("vsDelete").hidden = MODE === "demo";
+  $("vsSample").src = MODE === "demo" ? (v.sample_url || "") : `/api/voices/${v.id}/sample`;
   $("vsMeta").textContent =
     `Sample ${Math.round(v.sample_duration)}s · ${v.clips?.length || 0} clips · created ${fmtDate(v.created)}`;
   $("voiceSheet").hidden = false;
@@ -635,9 +796,9 @@ $("btnSettingsVoice").onclick = () => {
 $("vsClose").onclick = async () => {
   const v = activeVoice();
   const newName = $("vsName").value.trim();
-  if (v && newName && newName !== v.name) {
+  if (MODE !== "demo" && v && newName && newName !== v.name) {
     try { await api.patchVoice(v.id, { name: newName }); await refreshVoices(false); renderVoices(); }
-    catch (e) { toast(e.message, true); }
+    catch (e) { handleApiError(e); }
   }
   $("vsSample").pause();
   $("voiceSheet").hidden = true;
@@ -653,20 +814,59 @@ $("vsDelete").onclick = async () => {
     activeVoiceId = null;
     localStorage.removeItem("activeVoice");
     await refreshVoices();
-  } catch (e) { toast(e.message, true); }
+  } catch (e) { handleApiError(e); }
 };
 
 /* close sheets when tapping the dimmed backdrop */
 $("voiceSheet").addEventListener("click", (e) => { if (e.target === $("voiceSheet")) $("vsClose").click(); });
 $("wizard").addEventListener("click", (e) => { if (e.target === $("wizard")) closeWizard(); });
+$("demoGate").addEventListener("click", (e) => { if (e.target === $("demoGate")) closeDemoGate(); });
+
+/* ---------------- demo gate ---------------- */
+function openDemoGate() { $("demoGate").hidden = false; }
+function closeDemoGate() { $("demoGate").hidden = true; }
+$("demoGateClose").onclick = closeDemoGate;
+$("demoGateClose2").onclick = closeDemoGate;
+
+/* ---------------- demo banner ---------------- */
+function setupDemoBanner() {
+  $("demoBanner").hidden = MODE !== "demo";
+}
+
+/* ---------------- mode-dependent UI setup (run once, after resolveMode) ---------------- */
+function applyModeUI() {
+  document.body.dataset.mode = MODE;
+  if (MODE === "demo") document.title = "VoiceForge — Demo";
+  setupDemoBanner();
+  $("brandDemoTag").hidden = MODE !== "demo";
+  $("emptyGithubLink").href = CONFIG.repoUrl;
+  $("demoBannerGithub").href = CONFIG.repoUrl;
+  $("demoGateGithub").href = CONFIG.repoUrl;
+  $("btnTweak").hidden = MODE === "demo";
+  if (MODE === "demo") {
+    $("genText").readOnly = true;
+    $("genText").placeholder = "Tap a pre-recorded line below to hear it";
+    $("charCount").hidden = true;
+    $("btnDictate").hidden = true;
+    $("btnGenerate").querySelector(".btn-label").textContent = "Generate new speech — local app only";
+    $("btnNewVoiceLabel").textContent = "New voice (local app)";
+  }
+}
 
 /* ---------------- boot ---------------- */
 async function refreshVoices(rerender = true) {
   voices = await api.voices();
-  if (rerender) { renderVoices(); renderClips(); }
+  if (rerender) {
+    renderVoices();
+    renderClips();
+    if (MODE === "demo") { renderTryLines(); renderOriginalCard(); }
+  }
 }
 
 (async function boot() {
+  await resolveMode();
+  if (MODE === "demo") api = demoApi;
+  applyModeUI();
   try { await refreshVoices(); }
   catch { toast("Cannot reach the server", true); }
   pollStatus();
